@@ -15,12 +15,29 @@ export default function Contact() {
     setSending(true)
 
     try {
-      // TODO: Replace with your EmailJS credentials
-      // import emailjs from 'emailjs-com'
-      // await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form, 'YOUR_PUBLIC_KEY')
-      await new Promise(res => setTimeout(res, 1200))
-      setStatus('success')
-      setForm({ name: '', email: '', subject: '', message: '' })
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "2b39c289-554d-405b-b0a1-580a0c9200a2",
+          name: form.name,
+          email: form.email,
+          subject: form.subject,
+          message: form.message,
+        }),
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setStatus('success')
+        setForm({ name: '', email: '', subject: '', message: '' })
+      } else {
+        setStatus('error')
+      }
     } catch (err) {
       setStatus('error')
     } finally {
@@ -187,7 +204,7 @@ export default function Contact() {
             )}
 
             <p className="font-mono text-xs text-smoke/40 text-center">
-              Powered by EmailJS — configure your keys in Contact.jsx
+              Responses will be sent directly to your email.
             </p>
           </motion.form>
         </div>
