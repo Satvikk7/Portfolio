@@ -127,7 +127,7 @@ function PosterCard({ poster, index, inView, onClick }) {
       </div>
 
       {/* Info panel — always visible, no translate hiding */}
-      <div className="absolute bottom-0 left-0 right-0 p-5">
+      <div className="absolute bottom-0 left-0 right-0 px-5 pb-6 pt-16">
         <p
           className="font-outfit font-bold text-white text-base mb-0.5 leading-tight"
           style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}
