@@ -3,6 +3,45 @@ import { motion } from 'framer-motion'
 
 const roles = ['Software Developer', 'Graphic Designer', 'UI/UX Thinker', 'Creative Technologist']
 
+function FlipStat() {
+  const [isFlipped, setIsFlipped] = useState(false)
+
+  return (
+    <div 
+      className="text-center relative w-40 h-12 cursor-pointer"
+      style={{ perspective: 1000 }}
+      onMouseEnter={() => setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <motion.div
+        className="w-full h-full relative"
+        initial={false}
+        animate={{ rotateX: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 14 }}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        {/* Front */}
+        <div 
+          className="absolute inset-0 flex flex-col items-center justify-center"
+          style={{ backfaceVisibility: 'hidden' }}
+        >
+          <p className="font-outfit font-bold text-[20px] text-teal leading-none whitespace-nowrap">Graphic Designer</p>
+          <p className="font-mono text-xs text-smoke mt-1">Role</p>
+        </div>
+
+        {/* Back */}
+        <div 
+          className="absolute inset-0 flex flex-col items-center justify-center"
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}
+        >
+          <p className="font-outfit font-bold text-[14px] text-teal leading-tight whitespace-nowrap">Software Development<br/>Engineer</p>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 export default function Hero() {
   const [roleIndex, setRoleIndex] = useState(0)
   const [displayed, setDisplayed] = useState('')
@@ -154,13 +193,13 @@ export default function Hero() {
               {[
                 { label: 'Projects', value: '6+' },
                 { label: 'Internships', value: '2' },
-                { label: 'Club Role', value: 'Designing Head' },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <p className="font-outfit font-bold text-2xl text-teal">{stat.value}</p>
                   <p className="font-mono text-xs text-smoke mt-1">{stat.label}</p>
                 </div>
               ))}
+              <FlipStat />
             </motion.div>
           </div>
 
