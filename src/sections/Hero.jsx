@@ -6,9 +6,16 @@ const roles = ['Software Developer', 'Graphic Designer', 'UI/UX Thinker', 'Creat
 function FlipStat() {
   const [isFlipped, setIsFlipped] = useState(false)
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsFlipped(prev => !prev)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div 
-      className="text-center relative w-40 h-12 cursor-pointer"
+      className="text-center relative w-[220px] h-12 cursor-pointer"
       style={{ perspective: 1000 }}
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
@@ -18,7 +25,7 @@ function FlipStat() {
         className="w-full h-full relative"
         initial={false}
         animate={{ rotateX: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 14 }}
+        transition={{ duration: 0.8, type: 'spring', stiffness: 100, damping: 15 }}
         style={{ transformStyle: 'preserve-3d' }}
       >
         {/* Front */}
@@ -27,7 +34,6 @@ function FlipStat() {
           style={{ backfaceVisibility: 'hidden' }}
         >
           <p className="font-outfit font-bold text-[20px] text-teal leading-none whitespace-nowrap">Graphic Designer</p>
-          <p className="font-mono text-xs text-smoke mt-1">Role</p>
         </div>
 
         {/* Back */}
@@ -35,7 +41,7 @@ function FlipStat() {
           className="absolute inset-0 flex flex-col items-center justify-center"
           style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}
         >
-          <p className="font-outfit font-bold text-[14px] text-teal leading-tight whitespace-nowrap">Software Development<br/>Engineer</p>
+          <p className="font-outfit font-bold text-[20px] text-teal leading-tight whitespace-nowrap">Software Development<br/>Engineer</p>
         </div>
       </motion.div>
     </div>
