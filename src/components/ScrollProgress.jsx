@@ -7,7 +7,9 @@ export default function ScrollProgress() {
   const [rotateDeg, setRotateDeg] = useState(-45)
   const [showFlame, setShowFlame] = useState(false)
   const sidebarRef = useRef(null)
+  const isDraggingRef = useRef(false)
   const activePointerIdRef = useRef(null)
+  const lastPointerYRef = useRef(0)
   const lastYRef = useRef(0)
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
@@ -23,7 +25,7 @@ export default function ScrollProgress() {
     const scrollingUp = y < lastYRef.current
     lastYRef.current = y
 
-    if (!isDragging) {
+    if (!isDraggingRef.current) {
       setProgress(next)
     }
 
@@ -81,19 +83,23 @@ export default function ScrollProgress() {
   const beginDrag = (event) => {
     event.preventDefault()
     activePointerIdRef.current = event.pointerId
+    isDraggingRef.current = true
+    lastPointerYRef.current = event.clientY
     setIsDragging(true)
     event.currentTarget.setPointerCapture(event.pointerId)
     updateFromPointer(event.clientY)
   }
 
   const handlePointerMove = (event) => {
-    if (!isDragging || activePointerIdRef.current !== event.pointerId) return
+    if (!isDraggingRef.current || activePointerIdRef.current !== event.pointerId) return
+    lastPointerYRef.current = event.clientY
     updateFromPointer(event.clientY)
   }
 
   const endDrag = (event) => {
     if (activePointerIdRef.current !== event.pointerId) return
     activePointerIdRef.current = null
+    isDraggingRef.current = false
     setIsDragging(false)
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
@@ -112,13 +118,13 @@ export default function ScrollProgress() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
     }
-  }, [isDragging])
+  }, [])
 
   const visualProgress = 0.03 + progress * 0.94
 
   return (
     <div
-      className="fixed top-0 bottom-0 right-0 sm:right-1 lg:right-2 w-14 sm:w-16 lg:w-18 z-30 touch-none select-none"
+      className="fixed top-20 bottom-4 right-0 sm:right-1 lg:right-2 w-20 sm:w-24 lg:w-24 z-30 touch-none select-none"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
