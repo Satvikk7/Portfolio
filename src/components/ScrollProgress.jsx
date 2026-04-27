@@ -106,7 +106,7 @@ export default function ScrollProgress() {
     <div className="fixed top-0 bottom-0 right-1 sm:right-2 w-10 sm:w-12 lg:w-14 z-30 pointer-events-none">
       <div
         ref={sidebarRef}
-        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[1.5px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-auto"
+        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[1.5px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-none lg:pointer-events-auto"
         onPointerDown={(e) => {
           setIsDragging(true)
           updateFromPointer(e.clientY)
@@ -114,7 +114,7 @@ export default function ScrollProgress() {
       />
 
       <motion.div
-        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-teal-DEFAULT drop-shadow-[0_0_10px_#2ea3b0] pointer-events-auto cursor-grab active:cursor-grabbing"
+        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-teal-DEFAULT drop-shadow-[0_0_10px_#2ea3b0] pointer-events-none lg:pointer-events-auto select-none cursor-grab active:cursor-grabbing"
         style={{ top: `${visualProgress * 100}%`, transformOrigin: '50% 85%' }}
         animate={{ rotate: rotateDeg, scale: isDragging ? 1.08 : 1 }}
         transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
@@ -126,7 +126,7 @@ export default function ScrollProgress() {
       >
         {showFlame && (
           <motion.div
-            className="absolute left-1/2 top-[82%] -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-4 rounded-full bg-gradient-to-b from-teal-DEFAULT to-transparent"
+            className="absolute left-1/2 top-[82%] -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-4 rounded-full bg-gradient-to-b from-teal-DEFAULT to-transparent pointer-events-none"
             animate={{ opacity: [0.4, 0.9, 0.4], scaleY: [0.9, 1.2, 0.9] }}
             transition={{ duration: 0.35, repeat: Infinity }}
           />
