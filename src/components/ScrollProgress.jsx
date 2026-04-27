@@ -118,16 +118,18 @@ export default function ScrollProgress() {
 
   return (
     <div
-      className="fixed top-0 bottom-0 right-1 sm:right-2 w-10 sm:w-12 lg:w-14 z-30 touch-none select-none"
+      className="fixed top-0 bottom-0 right-0 sm:right-1 lg:right-2 w-14 sm:w-16 lg:w-18 z-30 touch-none select-none"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onLostPointerCapture={endDrag}
+      onPointerDown={beginDrag}
     >
+      <div className="absolute inset-y-2 right-0 w-12 sm:w-14 bg-transparent" />
+
       <div
         ref={sidebarRef}
-        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[1.5px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25"
-        onPointerDown={beginDrag}
+        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-none"
       />
 
       <motion.div
