@@ -77,41 +77,18 @@ const posters = [
   },
 ]
 
-function PosterCard({ poster, inView, onClick, from = 'bottom', delay = 0 }) {
-  const variants = {
-    hidden: {
-      opacity: 0,
-      x: from === 'left' ? -60 : from === 'right' ? 60 : 0,
-      y: from === 'bottom' ? 50 : 0,
-      scale: from === 'bottom' ? 0.93 : 1,
-    },
-    visible: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      scale: 1,
-    },
-  }
-
+function PosterCard({ poster, inView, onClick, delay = 0 }) {
   return (
     <motion.div
-      variants={variants}
-      initial="hidden"
-      animate={inView ? 'visible' : 'hidden'}
-      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: [0.23, 1, 0.32, 1] }}
       className="group relative overflow-hidden rounded-lg cursor-pointer"
       style={{ minHeight: poster.size === 'featured' ? '560px' : '280px' }}
       onClick={onClick}
       whileHover={{ y: -5, transition: { duration: 0.25 } }}
     >
-      {/* Image — with subtle reveal overlay that fades away once card is in view */}
-      <motion.div
-        className="absolute inset-0 bg-carbon z-10 origin-bottom"
-        initial={{ scaleY: 1 }}
-        animate={inView ? { scaleY: 0 } : { scaleY: 1 }}
-        transition={{ duration: 0.65, delay: delay + 0.25, ease: [0.76, 0, 0.24, 1] }}
-        style={{ transformOrigin: 'top' }}
-      />
+      {/* Image */}
       <img
         src={poster.src}
         alt={poster.title}
@@ -297,19 +274,15 @@ export default function Gallery() {
 
         {/* Row 1: Featured (large) + 2 stacked */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-          {/* Featured — sweeps in from the left */}
           <div className="lg:col-span-2">
-            <PosterCard poster={posters[0]} from="left" delay={0.2} inView={inView} onClick={() => setSelected(posters[0].id)} />
+            <PosterCard poster={posters[0]} delay={0.15} inView={inView} onClick={() => setSelected(posters[0].id)} />
           </div>
-
-          {/* Right 2-stack — sweep in from the right, staggered */}
           <div className="lg:col-span-3 grid grid-rows-2 gap-4">
             {posters.slice(1, 3).map((poster, i) => (
               <PosterCard
                 key={poster.id}
                 poster={poster}
-                from="right"
-                delay={0.3 + i * 0.15}
+                delay={0.2 + i * 0.1}
                 inView={inView}
                 onClick={() => setSelected(poster.id)}
               />
@@ -317,28 +290,26 @@ export default function Gallery() {
           </div>
         </div>
 
-        {/* Row 2: 3 equal columns — rise up with stagger */}
+        {/* Row 2: 3 equal columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {posters.slice(3, 6).map((poster, i) => (
             <PosterCard
               key={poster.id}
               poster={poster}
-              from="bottom"
-              delay={0.15 + i * 0.12}
+              delay={0.1 + i * 0.1}
               inView={inView}
               onClick={() => setSelected(poster.id)}
             />
           ))}
         </div>
 
-        {/* Row 3: 2 equal columns — rise up with slight delay */}
+        {/* Row 3: 2 equal columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {posters.slice(6).map((poster, i) => (
             <PosterCard
               key={poster.id}
               poster={poster}
-              from="bottom"
-              delay={0.2 + i * 0.15}
+              delay={0.1 + i * 0.1}
               inView={inView}
               onClick={() => setSelected(poster.id)}
             />
