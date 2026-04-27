@@ -11,6 +11,7 @@ import Gallery from './sections/Gallery'
 import Contact from './sections/Contact'
 import Footer from './components/Footer'
 import Loader from './components/Loader'
+import ScrollProgress from './components/ScrollProgress'
 
 export default function App() {
   const [loading, setLoading] = useState(true)
@@ -63,6 +64,7 @@ export default function App() {
           className="noise-bg"
         >
           <div className="grid-bg min-h-screen designer-bg">
+            <ScrollProgress />
             <Navbar />
             <main>
               <Hero />
