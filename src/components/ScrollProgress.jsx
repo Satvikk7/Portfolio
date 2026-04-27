@@ -7,6 +7,7 @@ export default function ScrollProgress() {
   const [rotateDeg, setRotateDeg] = useState(-45)
   const [showFlame, setShowFlame] = useState(false)
   const sidebarRef = useRef(null)
+  const activePointerIdRef = useRef(null)
   const lastYRef = useRef(0)
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
@@ -77,52 +78,63 @@ export default function ScrollProgress() {
     window.scrollTo({ top: relative * getMaxScroll(), behavior: 'auto' })
   }
 
+  const beginDrag = (event) => {
+    event.preventDefault()
+    activePointerIdRef.current = event.pointerId
+    setIsDragging(true)
+    event.currentTarget.setPointerCapture(event.pointerId)
+    updateFromPointer(event.clientY)
+  }
+
+  const handlePointerMove = (event) => {
+    if (!isDragging || activePointerIdRef.current !== event.pointerId) return
+    updateFromPointer(event.clientY)
+  }
+
+  const endDrag = (event) => {
+    if (activePointerIdRef.current !== event.pointerId) return
+    activePointerIdRef.current = null
+    setIsDragging(false)
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+  }
+
   useEffect(() => {
     const onScroll = () => updateFromScroll()
     const onResize = () => updateFromScroll()
-    const onPointerMove = (e) => {
-      if (!isDragging) return
-      updateFromPointer(e.clientY)
-    }
-    const onPointerUp = () => setIsDragging(false)
 
     updateFromScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize)
-    window.addEventListener('pointermove', onPointerMove)
-    window.addEventListener('pointerup', onPointerUp)
 
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
-      window.removeEventListener('pointermove', onPointerMove)
-      window.removeEventListener('pointerup', onPointerUp)
     }
   }, [isDragging])
 
   const visualProgress = 0.03 + progress * 0.94
 
   return (
-    <div className="fixed top-0 bottom-0 right-1 sm:right-2 w-10 sm:w-12 lg:w-14 z-30 pointer-events-none">
+    <div
+      className="fixed top-0 bottom-0 right-1 sm:right-2 w-10 sm:w-12 lg:w-14 z-30 touch-none select-none"
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onLostPointerCapture={endDrag}
+    >
       <div
         ref={sidebarRef}
-        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[1.5px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-none lg:pointer-events-auto"
-        onPointerDown={(e) => {
-          setIsDragging(true)
-          updateFromPointer(e.clientY)
-        }}
+        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[1.5px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25"
+        onPointerDown={beginDrag}
       />
 
       <motion.div
-        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-teal-DEFAULT drop-shadow-[0_0_10px_#2ea3b0] pointer-events-none lg:pointer-events-auto select-none cursor-grab active:cursor-grabbing"
+        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-teal-DEFAULT drop-shadow-[0_0_10px_#2ea3b0] pointer-events-none select-none"
         style={{ top: `${visualProgress * 100}%`, transformOrigin: '50% 85%' }}
         animate={{ rotate: rotateDeg, scale: isDragging ? 1.08 : 1 }}
         transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
-        onPointerDown={(e) => {
-          e.preventDefault()
-          setIsDragging(true)
-          updateFromPointer(e.clientY)
-        }}
       >
         {showFlame && (
           <motion.div
