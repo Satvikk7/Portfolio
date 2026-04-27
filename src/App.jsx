@@ -63,7 +63,7 @@ export default function App() {
           transition={{ duration: 0.6 }}
           className="noise-bg"
         >
-          <div className="grid-bg min-h-screen designer-bg">
+          <div className="grid-bg min-h-screen designer-bg pr-10 sm:pr-12 lg:pr-16">
             <ScrollProgress />
             <Navbar />
             <main>

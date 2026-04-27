@@ -103,10 +103,10 @@ export default function ScrollProgress() {
   const visualProgress = 0.03 + progress * 0.94
 
   return (
-    <div className="hidden lg:block fixed top-0 bottom-0 right-2 w-12 z-40 pointer-events-none">
+    <div className="fixed top-0 bottom-0 right-1 sm:right-2 w-10 sm:w-12 lg:w-14 z-30 pointer-events-none">
       <div
         ref={sidebarRef}
-        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-auto"
+        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[1.5px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-auto"
         onPointerDown={(e) => {
           setIsDragging(true)
           updateFromPointer(e.clientY)
@@ -126,15 +126,16 @@ export default function ScrollProgress() {
       >
         {showFlame && (
           <motion.div
-            className="absolute left-1/2 top-[82%] -translate-x-1/2 w-2 h-4 rounded-full bg-gradient-to-b from-teal-DEFAULT to-transparent"
+            className="absolute left-1/2 top-[82%] -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-4 rounded-full bg-gradient-to-b from-teal-DEFAULT to-transparent"
             animate={{ opacity: [0.4, 0.9, 0.4], scaleY: [0.9, 1.2, 0.9] }}
             transition={{ duration: 0.35, repeat: Infinity }}
           />
         )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
+          width="24"
+          height="24"
+          className="h-6 w-6 sm:h-7 sm:w-7"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
