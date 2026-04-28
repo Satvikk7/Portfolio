@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
-import { useState } from 'react'
 
 const traits = [
   { icon: '⌨', label: 'MERN Stack Developer' },
@@ -8,51 +7,6 @@ const traits = [
   { icon: '☁', label: 'AWS Cloud Practitioner' },
   { icon: '🔍', label: 'Problem-Solving Mindset' },
 ]
-
-function FlipRoleCard({ inView }) {
-  const [isFlipped, setIsFlipped] = useState(false)
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: 0.3 }}
-      className="relative w-full max-w-[340px] h-14 sm:h-16 cursor-pointer mb-8 group"
-      style={{ perspective: 1000 }}
-      onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
-      onClick={() => setIsFlipped(!isFlipped)}
-    >
-      <motion.div
-        className="w-full h-full relative"
-        initial={false}
-        animate={{ rotateX: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: 'spring', stiffness: 120, damping: 14 }}
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        {/* Front */}
-        <div 
-          className="absolute inset-0 flex items-center justify-center rounded-sm border border-teal/30 bg-carbon/50 backdrop-blur-sm shadow-lg"
-          style={{ backfaceVisibility: 'hidden' }}
-        >
-          <p className="font-outfit font-bold text-base sm:text-lg text-white tracking-wide">
-            <span className="text-teal mr-2">🎨</span> Graphic Designer
-          </p>
-        </div>
-
-        {/* Back */}
-        <div 
-          className="absolute inset-0 flex items-center justify-center rounded-sm bg-teal shadow-[0_0_20px_rgba(46,163,176,0.3)]"
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateX(180deg)' }}
-        >
-          <p className="font-outfit font-bold text-base sm:text-lg text-void tracking-wide">
-            <span className="mr-2">💻</span> Software Development Engineer
-          </p>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
 
 export default function About() {
   const [ref, inView] = useInView({ threshold: 0.2, triggerOnce: true })
@@ -94,8 +48,6 @@ export default function About() {
               I'm Satvik Gupta — a Computer Science student at <span className="text-white font-medium">GLA University, Mathura</span>, 
               operating at the intersection of software engineering and visual design.
             </motion.p>
-
-            <FlipRoleCard inView={inView} />
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}

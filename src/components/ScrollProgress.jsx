@@ -3,172 +3,87 @@ import { motion } from 'framer-motion'
 
 export default function ScrollProgress() {
   const [progress, setProgress] = useState(0)
-  const [isDragging, setIsDragging] = useState(false)
-  const [rotateDeg, setRotateDeg] = useState(-45)
-  const [showFlame, setShowFlame] = useState(false)
-  const sidebarRef = useRef(null)
-  const isDraggingRef = useRef(false)
-  const activePointerIdRef = useRef(null)
-  const lastPointerYRef = useRef(0)
-  const lastYRef = useRef(0)
-
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
-
-  const getMaxScroll = () => Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-
-  const updateFromScroll = () => {
-    const y = window.scrollY
-    const max = getMaxScroll()
-    const next = clamp(y / max, 0, 1)
-
-    const scrollingDown = y > lastYRef.current
-    const scrollingUp = y < lastYRef.current
-    lastYRef.current = y
-
-    if (!isDraggingRef.current) {
-      setProgress(next)
-    }
-
-    // Top parked state near navbar.
-    if (next <= 0.01) {
-      setRotateDeg(-45)
-      setShowFlame(false)
-      return
-    }
-
-    // Scroll down: launch from top, then descend, then land tail-first near bottom.
-    if (scrollingDown) {
-      const topLaunchRange = 0.14
-      const bottomLandingStart = 0.82
-
-      if (next < topLaunchRange) {
-        const t = clamp(next / topLaunchRange, 0, 1)
-        setRotateDeg(-45 + t * 180)
-        setShowFlame(true)
-        return
-      }
-
-      if (next > bottomLandingStart) {
-        const t = clamp((next - bottomLandingStart) / (1 - bottomLandingStart), 0, 1)
-        setRotateDeg(135 + t * -180)
-        setShowFlame(false)
-        return
-      }
-
-      setRotateDeg(135)
-      setShowFlame(false)
-      return
-    }
-
-    // Scroll up: once landed facing up, keep facing up while traveling to top.
-    if (scrollingUp) {
-      setRotateDeg(-45)
-      setShowFlame(false)
-      return
-    }
-
-    setShowFlame(false)
-  }
-
-  const updateFromPointer = (clientY) => {
-    const sidebar = sidebarRef.current
-    if (!sidebar) return
-
-    const rect = sidebar.getBoundingClientRect()
-    const relative = clamp((clientY - rect.top) / rect.height, 0, 1)
-    setProgress(relative)
-    window.scrollTo({ top: relative * getMaxScroll(), behavior: 'auto' })
-  }
-
-  const beginDrag = (event) => {
-    event.preventDefault()
-    activePointerIdRef.current = event.pointerId
-    isDraggingRef.current = true
-    lastPointerYRef.current = event.clientY
-    setIsDragging(true)
-    event.currentTarget.setPointerCapture(event.pointerId)
-    updateFromPointer(event.clientY)
-  }
-
-  const handlePointerMove = (event) => {
-    if (!isDraggingRef.current || activePointerIdRef.current !== event.pointerId) return
-    lastPointerYRef.current = event.clientY
-    updateFromPointer(event.clientY)
-  }
-
-  const endDrag = (event) => {
-    if (activePointerIdRef.current !== event.pointerId) return
-    activePointerIdRef.current = null
-    isDraggingRef.current = false
-    setIsDragging(false)
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId)
-    }
-  }
+  const [direction, setDirection] = useState('down')
+  const lastScrollY = useRef(0)
 
   useEffect(() => {
-    const onScroll = () => updateFromScroll()
-    const onResize = () => updateFromScroll()
+    const onScroll = () => {
+      const y = window.scrollY
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+      setProgress(y / max)
 
-    updateFromScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onResize)
-
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onResize)
+      if (y > lastScrollY.current + 2) {
+        setDirection('down')
+      } else if (y < lastScrollY.current - 2) {
+        setDirection('up')
+      }
+      lastScrollY.current = y
     }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const visualProgress = 0.03 + progress * 0.94
+  // Rocket rotation: -45deg = nose pointing up (launching), 135deg = nose pointing down (landing)
+  const rocketRotation = direction === 'down' ? 135 : -45
+
+  // Keep rocket within the track with some padding
+  const topPercent = 2 + progress * 96
 
   return (
-    <div
-      className="fixed top-20 bottom-4 right-0 sm:right-1 lg:right-2 w-20 sm:w-24 lg:w-24 z-30 touch-none select-none"
-      onPointerMove={handlePointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
-      onLostPointerCapture={endDrag}
-      onPointerDown={beginDrag}
-    >
-      <div className="absolute inset-y-2 right-0 w-12 sm:w-14 bg-transparent" />
+    <div className="fixed top-0 right-3 md:right-6 h-full w-10 z-50 pointer-events-none py-16">
+      <div className="relative w-full h-full flex justify-center">
+        {/* Track line */}
+        <div className="absolute top-0 w-px h-full bg-ash/15 rounded-full" />
 
-      <div
-        ref={sidebarRef}
-        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-none"
-      />
+        {/* Glowing progress fill (from top) */}
+        <motion.div
+          className="absolute top-0 w-[2px] rounded-full bg-teal shadow-[0_0_8px_#2ea3b0]"
+          style={{ height: `${topPercent}%` }}
+        />
 
-      <motion.div
-        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-teal-DEFAULT drop-shadow-[0_0_10px_#2ea3b0] pointer-events-none select-none"
-        style={{ top: `${visualProgress * 100}%`, transformOrigin: '50% 85%' }}
-        animate={{ rotate: rotateDeg, scale: isDragging ? 1.08 : 1 }}
-        transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
-      >
-        {showFlame && (
-          <motion.div
-            className="absolute left-1/2 top-[82%] -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-4 rounded-full bg-gradient-to-b from-teal-DEFAULT to-transparent pointer-events-none"
-            animate={{ opacity: [0.4, 0.9, 0.4], scaleY: [0.9, 1.2, 0.9] }}
-            transition={{ duration: 0.35, repeat: Infinity }}
-          />
-        )}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          className="h-6 w-6 sm:h-7 sm:w-7"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        {/* Rocket */}
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ top: `${topPercent}%` }}
+          animate={{ rotate: rocketRotation }}
+          transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         >
-          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-          <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
-          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
-          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
-        </svg>
-      </motion.div>
+          {/* Flame trail */}
+          <motion.div
+            className="absolute left-1/2 -translate-x-1/2 w-1.5 rounded-full bg-gradient-to-b from-teal/80 to-transparent pointer-events-none"
+            style={{
+              top: direction === 'down' ? '-12px' : 'auto',
+              bottom: direction === 'up' ? '-12px' : 'auto',
+              transformOrigin: direction === 'down' ? 'bottom' : 'top',
+            }}
+            animate={{
+              height: [8, 14, 8],
+              opacity: progress > 0.005 ? [0.5, 1, 0.5] : 0,
+            }}
+            transition={{ duration: 0.4, repeat: Infinity }}
+          />
+
+          {/* Rocket SVG */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#2ea3b0"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="drop-shadow-[0_0_10px_#2ea3b0]"
+          >
+            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+          </svg>
+        </motion.div>
+      </div>
     </div>
   )
 }
