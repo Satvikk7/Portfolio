@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTheme, THEMES } from '../context/ThemeContext'
 
 export default function ScrollProgress() {
+  const { theme } = useTheme()
   const [progress, setProgress] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [rotateDeg, setRotateDeg] = useState(-45)
@@ -11,6 +13,10 @@ export default function ScrollProgress() {
   const activePointerIdRef = useRef(null)
   const lastPointerYRef = useRef(0)
   const lastYRef = useRef(0)
+
+  const isSystem = theme === THEMES.SYSTEM
+  const accentClass = isSystem ? 'text-teal' : 'text-sky-400'
+  const glowClass = isSystem ? 'drop-shadow-[0_0_12px_rgba(46,163,176,0.6)]' : 'drop-shadow-[0_0_15px_rgba(56,189,248,0.6)]'
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 
@@ -29,14 +35,12 @@ export default function ScrollProgress() {
       setProgress(next)
     }
 
-    // Top parked state near navbar.
     if (next <= 0.01) {
       setRotateDeg(-45)
       setShowFlame(false)
       return
     }
 
-    // Scroll down: launch from top, then descend, then land tail-first near bottom.
     if (scrollingDown) {
       const topLaunchRange = 0.14
       const bottomLandingStart = 0.82
@@ -60,7 +64,6 @@ export default function ScrollProgress() {
       return
     }
 
-    // Scroll up: once landed facing up, keep facing up while traveling to top.
     if (scrollingUp) {
       setRotateDeg(-45)
       setShowFlame(false)
@@ -124,7 +127,7 @@ export default function ScrollProgress() {
 
   return (
     <div
-      className="fixed top-20 bottom-4 right-0 sm:right-1 lg:right-2 w-20 sm:w-24 lg:w-24 z-30 touch-none select-none"
+      className="fixed top-20 bottom-4 right-0 sm:right-1 lg:right-2 w-20 sm:w-24 lg:w-24 z-30 pointer-events-none lg:pointer-events-auto touch-none select-none"
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
@@ -135,20 +138,20 @@ export default function ScrollProgress() {
 
       <div
         ref={sidebarRef}
-        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] sm:w-[2px] rounded-full bg-teal-DEFAULT/25 pointer-events-none"
+        className="absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] pointer-events-none bg-transparent"
       />
 
       <motion.div
-        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 text-teal-DEFAULT drop-shadow-[0_0_10px_#2ea3b0] pointer-events-none select-none"
+        className={`absolute left-1/2 -translate-x-1/2 -translate-y-1/2 transition-colors duration-700 pointer-events-none select-none ${accentClass} ${glowClass}`}
         style={{ top: `${visualProgress * 100}%`, transformOrigin: '50% 85%' }}
-        animate={{ rotate: rotateDeg, scale: isDragging ? 1.08 : 1 }}
-        transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
+        animate={{ rotate: rotateDeg, scale: isDragging ? 1.15 : 1 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       >
         {showFlame && (
           <motion.div
-            className="absolute left-1/2 top-[82%] -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-4 rounded-full bg-gradient-to-b from-teal-DEFAULT to-transparent pointer-events-none"
-            animate={{ opacity: [0.4, 0.9, 0.4], scaleY: [0.9, 1.2, 0.9] }}
-            transition={{ duration: 0.35, repeat: Infinity }}
+            className={`absolute left-1/2 top-[82%] -translate-x-1/2 w-1.5 sm:w-2 h-3 sm:h-5 rounded-full pointer-events-none ${isSystem ? 'bg-gradient-to-b from-teal to-transparent' : 'bg-gradient-to-b from-sky-400 to-transparent'}`}
+            animate={{ opacity: [0.4, 1, 0.4], scaleY: [0.8, 1.3, 0.8] }}
+            transition={{ duration: 0.3, repeat: Infinity }}
           />
         )}
         <svg

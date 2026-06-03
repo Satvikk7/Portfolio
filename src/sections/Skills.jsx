@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { useState } from 'react'
+import { useTheme, THEMES } from '../context/ThemeContext'
 
 const devSkills = [
   { name: 'Java / C#', level: 85 },
@@ -24,38 +25,54 @@ const designSkills = [
   { name: 'UI/UX Prototyping', level: 72 },
 ]
 
-const techStack = [
-  'Java', 'JavaScript', 'C#', 'React', 'Node.js', 'Express', 'MongoDB', 'MySQL',
-  'HTML', 'CSS', 'Tailwind', 'Git', 'AWS', 'DSA', 'OOPs', 'DBMS', 'OS',
-  'Photoshop', 'Illustrator', 'Figma', 'Canva', 'Lightroom',
-]
-
-function SkillBar({ name, level, inView, delay }) {
+function SkillBar({ name, level, inView, delay, isSystem }) {
   const filledDots = Math.max(1, Math.min(5, Math.round(level / 20)))
+  const accentColor = isSystem ? 'bg-teal' : 'bg-sky-400'
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay, ease: [0.23, 1, 0.32, 1] }}
-      className="group flex items-center justify-between border-b border-ash/40 px-5 py-4 last:border-b-0"
+      className={`group flex items-center justify-between px-5 py-4 transition-all duration-300 ${
+        isSystem ? 'border-b border-ash/40 last:border-b-0' : 'mb-2 hover:bg-white/5 rounded-xl'
+      }`}
     >
       <span className="font-inter text-sm text-smoke group-hover:text-white transition-colors">{name}</span>
       <div className="flex items-center gap-1.5">
-        {[0, 1, 2, 3, 4].map((dot) => (
-          <span
-            key={dot}
-            className={`h-2.5 w-2.5 rounded-full transition-colors ${dot < filledDots ? 'bg-white' : 'bg-white/30'}`}
-          />
-        ))}
+        {isSystem ? (
+          [0, 1, 2, 3, 4].map((dot) => (
+            <span
+              key={dot}
+              className={`h-2.5 w-2.5 rounded-full transition-all duration-500 ${
+                dot < filledDots ? 'bg-teal shadow-[0_0_8px_#2ea3b0]' : 'bg-white/10'
+              }`}
+            />
+          ))
+        ) : (
+          <div className="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={inView ? { width: `${level}%` } : {}}
+              transition={{ duration: 1, delay: delay + 0.2 }}
+              className={`h-full rounded-full ${accentColor}`}
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   )
 }
 
 export default function Skills() {
+  const { theme } = useTheme()
   const [ref, inView] = useInView({ threshold: 0.1, triggerOnce: true })
-  const [active, setActive] = useState('dev')
+
+  const isSystem = theme === THEMES.SYSTEM
+  const activeSkills = isSystem ? devSkills : designSkills
+  
+  const accentColor = isSystem ? 'text-teal' : 'text-sky-400'
+  const accentBg = isSystem ? 'bg-teal' : 'bg-sky-400'
 
   return (
     <section id="skills" className="py-32 relative" ref={ref}>
@@ -63,11 +80,12 @@ export default function Skills() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
           className="section-tag mb-4 flex items-center gap-3"
         >
-          <span className="w-8 h-px bg-teal" />
-          02 — Skills
+          <span className={`w-8 h-px ${accentBg}`} />
+          <span className="tracking-[0.2em] font-mono text-[10px] uppercase">
+            {isSystem ? '02 — Technical Arsenal' : '02 — Creative Toolkit'}
+          </span>
         </motion.div>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
@@ -75,47 +93,38 @@ export default function Skills() {
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="font-outfit font-bold text-5xl md:text-6xl text-white leading-tight"
+            className={`font-outfit font-bold text-5xl md:text-6xl text-white leading-tight ${!isSystem && 'tracking-tight'}`}
           >
-            What I
+            {isSystem ? 'The Tech' : 'The Design'}
             <br />
-            <span className="gradient-text">work with</span>
+            <span className={`gradient-text ${!isSystem && 'from-sky-400 to-blue-500'}`}>Stack</span>
           </motion.h2>
 
-          <motion.div
+          <motion.p
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
             transition={{ delay: 0.3 }}
-            className="flex gap-2"
+            className="font-inter text-smoke/70 text-sm max-w-xs leading-relaxed"
           >
-            {[
-              { id: 'dev', label: 'Development' },
-              { id: 'design', label: 'Design' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActive(tab.id)}
-                className={`px-5 py-2 font-mono text-xs transition-all duration-300 ${
-                  active === tab.id
-                    ? 'bg-teal text-void'
-                    : 'border border-ash text-smoke hover:border-teal/30'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </motion.div>
+            {isSystem 
+              ? "A comprehensive overview of my programming languages, frameworks, and system-level expertise."
+              : "A curated selection of design tools and creative methodologies used to build visual narratives."
+            }
+          </motion.p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <motion.div
+            key={theme}
             initial={{ opacity: 0, y: 30 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="overflow-hidden rounded-xl border border-ash/50 bg-white/[0.02]"
+            className={`overflow-hidden transition-all duration-500 ${
+              isSystem ? 'rounded-sm border border-ash/50 bg-white/[0.02]' : 'rounded-3xl bg-slate-900/40 border border-white/5 p-4 backdrop-blur-sm'
+            }`}
           >
-            {(active === 'dev' ? devSkills : designSkills).map((skill, i) => (
-              <SkillBar key={skill.name} {...skill} inView={inView} delay={0.3 + i * 0.06} />
+            {activeSkills.map((skill, i) => (
+              <SkillBar key={skill.name} {...skill} inView={inView} delay={0.3 + i * 0.06} isSystem={isSystem} />
             ))}
           </motion.div>
 
@@ -125,15 +134,24 @@ export default function Skills() {
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <p className="font-mono text-xs text-smoke mb-4 tracking-widest uppercase">Full Tech Stack</p>
+              <p className={`font-mono text-[10px] mb-4 tracking-[0.3em] uppercase ${accentColor}`}>
+                {isSystem ? 'Backend & Infrastructure' : 'Visual Identity & Assets'}
+              </p>
               <div className="flex flex-wrap gap-2">
-                {techStack.map((tech, i) => (
+                {(isSystem 
+                  ? ['Java', 'C#', 'SQL', 'Git', 'AWS', 'DSA', 'OOPs', 'DBMS', 'OS']
+                  : ['Photoshop', 'Illustrator', 'Figma', 'Canva', 'Lightroom', 'Branding']
+                ).map((tech, i) => (
                   <motion.span
                     key={tech}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={inView ? { opacity: 1, scale: 1 } : {}}
                     transition={{ delay: 0.4 + i * 0.04 }}
-                    className="skill-pill text-xs cursor-default"
+                    className={`text-[10px] font-mono tracking-wider transition-all duration-500 px-4 py-2 ${
+                      isSystem 
+                        ? 'border border-ash text-smoke hover:border-teal hover:text-white' 
+                        : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-sky-400/10 hover:text-sky-400 rounded-full'
+                    }`}
                   >
                     {tech}
                   </motion.span>
@@ -147,40 +165,31 @@ export default function Skills() {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="grid grid-cols-2 gap-4"
             >
-              {[
+              {(isSystem ? [
                 { label: 'Frontend', value: 'React, Vite, Tailwind', icon: '⚡' },
                 { label: 'Backend', value: 'Node, Express, REST', icon: '⚙' },
-                { label: 'Database', value: 'MongoDB, Mongoose', icon: '🗄' },
                 { label: 'Cloud', value: 'AWS EC2, VPC, VPN', icon: '☁' },
-              ].map((item, i) => (
+                { label: 'Architecture', value: 'Microservices, OOP', icon: '🏗' },
+              ] : [
+                { label: 'Graphic Design', value: 'Posters, Mailers', icon: '🎨' },
+                { label: 'Photo Editing', value: 'Retouching, Color', icon: '📸' },
+                { label: 'UI/UX Design', value: 'Figma, Prototypes', icon: '📐' },
+                { label: 'Team Lead', value: 'Creative Direction', icon: '👑' },
+              ]).map((item, i) => (
                 <motion.div
                   key={item.label}
                   initial={{ opacity: 0, y: 10 }}
                   animate={inView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: 0.6 + i * 0.1 }}
-                  className="card-border bg-carbon p-4 rounded-sm"
+                  className={`p-5 transition-all duration-500 group ${
+                    isSystem ? 'card-border bg-carbon rounded-sm' : 'bg-slate-900/40 border border-white/5 rounded-2xl hover:bg-slate-900/60 shadow-lg shadow-black/10'
+                  }`}
                 >
-                  <div className="text-lg mb-2">{item.icon}</div>
-                  <p className="font-outfit font-bold text-sm text-white mb-1">{item.label}</p>
-                  <p className="font-inter text-xs text-smoke">{item.value}</p>
+                  <div className="text-xl mb-3 opacity-80 group-hover:scale-110 transition-transform duration-300">{item.icon}</div>
+                  <p className={`font-outfit font-bold text-sm text-white mb-1 ${!isSystem && accentColor}`}>{item.label}</p>
+                  <p className="font-inter text-xs text-smoke opacity-70 leading-snug">{item.value}</p>
                 </motion.div>
               ))}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.7 }}
-              className="border border-dashed border-ash p-5 rounded-sm"
-            >
-              <p className="font-mono text-xs text-teal mb-3">Learning Queue</p>
-              <div className="flex flex-wrap gap-2">
-                {['TypeScript', 'Next.js', 'Docker', 'Redux', 'GraphQL'].map(tech => (
-                  <span key={tech} className="font-mono text-xs text-smoke/60 border border-ash/50 px-3 py-1 rounded-full">
-                    {tech}
-                  </span>
-                ))}
-              </div>
             </motion.div>
           </div>
         </div>
