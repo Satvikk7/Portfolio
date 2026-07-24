@@ -5,13 +5,13 @@ import { ExternalLink } from 'lucide-react'
 
 const devTimeline = [
   {
-    year: '10 Mar 2026 – Present',
+    year: '10 Mar 2026 – 1 Jul 2026',
     role: 'Programmer Analyst Trainee',
     org: 'Cognizant',
-    type: 'Employment',
-    desc: 'Contributing to enterprise software development, code implementation, and collaborative delivery workflows.',
-    tags: ['Software Development', 'Enterprise', 'Collaborative Delivery'],
-    color: 'blue',
+    type: 'Completed',
+    desc: 'Contributed to enterprise software development, code implementation, and collaborative delivery workflows. Successfully completed on 1st July 2026.',
+    tags: ['Software Development', 'Enterprise', 'Collaborative Delivery', '✓ Completed'],
+    color: 'green',
   },
   {
     year: 'June 2024 – July 2024',
